@@ -1,0 +1,2 @@
+import express from 'express';import {getLeaderboard,createLeaderboard,updateLeaderboard,deleteLeaderboard} from '../controllers/leaderboardController.js';import {protect,adminOnly} from '../middleware/auth.js';
+const r=express.Router();r.get('/',getLeaderboard);r.post('/',protect,adminOnly,createLeaderboard);r.put('/:id',protect,adminOnly,updateLeaderboard);r.delete('/:id',protect,adminOnly,deleteLeaderboard);export default r;

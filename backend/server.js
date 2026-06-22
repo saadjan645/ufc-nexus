@@ -1,0 +1,12 @@
+import 'dotenv/config';
+import express from 'express';import cors from 'cors';import helmet from 'helmet';import morgan from 'morgan';import cookieParser from 'cookie-parser';import session from 'express-session';import rateLimit from 'express-rate-limit';
+import {connectDatabase} from './config/database.js';
+import authRoutes from './routes/authRoutes.js';import userRoutes from './routes/userRoutes.js';import fighterRoutes from './routes/fighterRoutes.js';import tournamentRoutes from './routes/tournamentRoutes.js';import leaderboardRoutes from './routes/leaderboardRoutes.js';import paymentRoutes from './routes/paymentRoutes.js';import contactRoutes from './routes/contactRoutes.js';import adminRoutes from './routes/adminRoutes.js';
+import {notFound,errorHandler} from './middleware/errorHandler.js';
+await connectDatabase();
+const app=express(),PORT=process.env.PORT||5000,CLIENT=process.env.CLIENT_URL||'http://localhost:3000';
+app.set('trust proxy',1);app.use(helmet({crossOriginResourcePolicy:false}));app.use(cors({origin:[CLIENT,'http://localhost:5500','http://127.0.0.1:5500','http://localhost:3000'],credentials:true}));app.use(express.json({limit:'3mb'}));app.use(express.urlencoded({extended:true}));app.use(cookieParser());app.use(morgan('dev'));app.use(session({name:'ufc_nexus_sid',secret:process.env.SESSION_SECRET||'dev_session',resave:false,saveUninitialized:false,cookie:{httpOnly:true,secure:process.env.NODE_ENV==='production',sameSite:'lax',maxAge:604800000}}));app.use(rateLimit({windowMs:15*60*1000,limit:300}));
+app.get('/api/health',(req,res)=>res.json({success:true,service:'UFC Nexus API',time:new Date().toISOString()}));
+app.use('/api/auth',authRoutes);app.use('/api/users',userRoutes);app.use('/api/fighters',fighterRoutes);app.use('/api/events',tournamentRoutes);app.use('/api/tournaments',tournamentRoutes);app.use('/api/leaderboard',leaderboardRoutes);app.use('/api/payments',paymentRoutes);app.use('/api/contact',contactRoutes);app.use('/api/admin',adminRoutes);
+app.use(notFound);app.use(errorHandler);
+app.listen(PORT,()=>console.log(`UFC Nexus API running on ${PORT}`));

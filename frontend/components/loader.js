@@ -1,0 +1,1 @@
+export function mountLoader(){const l=document.createElement('div');l.className='arena-loader';l.innerHTML='<div class="octagon-loader"><strong>UFC NEXUS</strong><small>opening the arena</small></div>';document.body.prepend(l);window.addEventListener('load',()=>{setTimeout(()=>l.classList.add('hide'),450);setTimeout(()=>l.remove(),1100)})}

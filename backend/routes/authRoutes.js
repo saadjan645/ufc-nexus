@@ -1,0 +1,2 @@
+import express from 'express';import {signup,login,logout,me,forgotPassword} from '../controllers/authController.js';import {protect} from '../middleware/auth.js';import {requireFields,validateEmail} from '../middleware/validate.js';
+const r=express.Router();r.post('/signup',requireFields('email','password','confirmPassword'),validateEmail,signup);r.post('/login',requireFields('email','password'),validateEmail,login);r.post('/logout',logout);r.get('/me',protect,me);r.post('/forgot-password',validateEmail,forgotPassword);export default r;

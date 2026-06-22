@@ -1,0 +1,9 @@
+import Stripe from 'stripe';
+import Payment from '../models/Payment.js';
+import Tournament from '../models/Tournament.js';
+import { ok, fail } from '../utils/sendResponse.js';
+const stripe=process.env.STRIPE_SECRET_KEY?.startsWith('sk_')?new Stripe(process.env.STRIPE_SECRET_KEY):null;
+export async function createCheckoutSession(req,res,next){try{const t=req.body.tournamentId?await Tournament.findById(req.body.tournamentId):null;const amount=Number(req.body.amount||t?.fee||99);const payment=await Payment.create({user:req.user?._id,amount,status:stripe?'pending':'mock_paid',metadata:{tournamentId:req.body.tournamentId}}); if(!stripe)return ok(res,{payment,mock:true,url:`${process.env.CLIENT_URL}/tournaments/tournaments.html?payment=mock-success&paymentId=${payment._id}`},'Mock checkout created'); const session=await stripe.checkout.sessions.create({mode:'payment',payment_method_types:['card'],line_items:[{price_data:{currency:'usd',product_data:{name:t?.title||'UFC Nexus Pass'},unit_amount:Math.round(amount*100)},quantity:1}],success_url:process.env.STRIPE_SUCCESS_URL,cancel_url:process.env.STRIPE_CANCEL_URL,metadata:{paymentId:payment._id.toString()}});payment.stripeSessionId=session.id;await payment.save();ok(res,{payment,sessionId:session.id,url:session.url},'Stripe checkout session created')}catch(e){next(e)}}
+export async function confirmPayment(req,res,next){try{const p=await Payment.findByIdAndUpdate(req.body.paymentId,{status:req.body.status||'paid'},{new:true}); if(!p)return fail(res,'Payment not found',404); ok(res,{payment:p},'Payment confirmed')}catch(e){next(e)}}
+export async function getPayments(req,res,next){try{ok(res,{payments:await Payment.find().populate('user').sort('-createdAt')})}catch(e){next(e)}}
+export const stripeWebhook=(req,res)=>res.json({received:true});

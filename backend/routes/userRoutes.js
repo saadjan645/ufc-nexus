@@ -1,0 +1,2 @@
+import express from 'express';import {getUsers,getUser,updateUser,deleteUser,toggleFavorite} from '../controllers/userController.js';import {protect,adminOnly} from '../middleware/auth.js';
+const r=express.Router();r.use(protect);r.get('/',adminOnly,getUsers);r.get('/:id',getUser);r.put('/:id',updateUser);r.delete('/:id',adminOnly,deleteUser);r.post('/:id/favorites/:fighterId',toggleFavorite);r.post('/me/favorites/:fighterId',toggleFavorite);export default r;

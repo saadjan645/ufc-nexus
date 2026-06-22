@@ -1,0 +1,2 @@
+import express from 'express';import {createCheckoutSession,confirmPayment,getPayments,stripeWebhook} from '../controllers/paymentController.js';import {protect,adminOnly,optionalAuth} from '../middleware/auth.js';
+const r=express.Router();r.post('/create-checkout-session',optionalAuth,createCheckoutSession);r.post('/confirm',optionalAuth,confirmPayment);r.get('/',protect,adminOnly,getPayments);r.post('/webhook',stripeWebhook);export default r;

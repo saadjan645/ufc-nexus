@@ -1,0 +1,2 @@
+import express from 'express';import {submitContact,getContacts,updateContact,deleteContact} from '../controllers/contactController.js';import {protect,adminOnly} from '../middleware/auth.js';import {requireFields,validateEmail} from '../middleware/validate.js';
+const r=express.Router();r.post('/',requireFields('name','email','message'),validateEmail,submitContact);r.get('/',protect,adminOnly,getContacts);r.put('/:id',protect,adminOnly,updateContact);r.delete('/:id',protect,adminOnly,deleteContact);export default r;
